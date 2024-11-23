@@ -1,0 +1,15 @@
+[package]
+name = "rustyclip"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+argh = "0.1.12"
+expanduser = "1.2.2"
+image-meta = "0.1.2"
+infer = "0.16.0"
+log = "0.4.22"
+log4rs = "1.3.0"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+xxhash-rust = { version = "0.8.12", features = ["const_xxh3", "const_xxh64"] }
