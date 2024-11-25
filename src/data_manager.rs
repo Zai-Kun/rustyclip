@@ -45,7 +45,12 @@ impl DataManager {
     pub fn add_item(&mut self, data: &[u8]) -> Result<(), Box<dyn Error>> {
         let key = xxh3_64(data).to_string();
 
-        if self.manifest_data.iter().any(|item| item.file_name == key) {
+        if let Some(index) = self
+            .manifest_data
+            .iter()
+            .position(|item| item.file_name == key)
+        {
+            self.put_item_on_top(index)?;
             return Ok(());
         }
 
@@ -89,6 +94,16 @@ impl DataManager {
         self.manifest_data.clear();
         self.write_manifest()
     }
+
+    pub fn put_item_on_top(&mut self, p: usize) -> Result<(), io::Error> {
+        if p >= self.manifest_data.len() {
+            return Ok(());
+        }
+        let i = self.manifest_data.remove(p);
+        self.manifest_data.insert(0, i);
+        self.write_manifest()?;
+        Ok(())
+    }
 }
 
 fn load_manifest(data_path: &Path) -> Result<Vec<ClipboardItem>, io::Error> {
@@ -106,7 +121,7 @@ fn generate_preview_and_mime_type(data: &[u8]) -> Result<(String, String), Box<d
     if let Ok(preview) = str::from_utf8(data) {
         let preview = preview.trim();
         return Ok((
-            preview[..(PREVIEW_LENGTH+1).min(preview.len())].to_string(),
+            preview[..(PREVIEW_LENGTH + 1).min(preview.len())].to_string(),
             "text/plain".to_string(),
         ));
     }

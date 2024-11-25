@@ -28,21 +28,23 @@ pub struct ListCommand {}
 pub struct StoreCommand {}
 
 #[derive(FromArgs, Debug)]
-/// Get a clipboard item by query
+/// Get a clipboard item by entry
 #[argh(subcommand, name = "get")]
 pub struct GetCommand {
     #[argh(positional)]
-    ///  it must start with an int (index to the item) sperated by ':' or just an int
-    pub query: Option<String>,
+    /// the entry must be either an integer index (starting from 1) or an integer index followed by a colon `:`
+    /// and a descriptive text (e.g., `1` or `1: some descriptive text`).
+    pub entry: Option<String>,
 }
 
 #[derive(FromArgs, Debug)]
-/// Remove a clipboard item by query
+/// Remove a clipboard item by entry
 #[argh(subcommand, name = "remove")]
 pub struct RemoveCommand {
     #[argh(positional)]
-    ///  it must start with an int (index to the item) sperated by ':' or just an int
-    pub query: Option<String>,
+    /// the entry must be either an integer index (starting from 1) or an integer index followed by a colon `:`
+    /// and a descriptive text (e.g., `1` or `1: some descriptive text`).
+    pub entry: Option<String>,
 }
 
 #[derive(FromArgs, Debug)]
