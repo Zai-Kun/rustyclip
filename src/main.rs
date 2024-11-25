@@ -42,7 +42,7 @@ fn run_app() -> Result<(), Box<dyn Error>> {
         Commands::Store(_) => store_item(&mut data_manager),
         Commands::Clear(_) => clear_database(&mut data_manager),
         Commands::Remove(remove_cmd) => remove_item(&mut data_manager, remove_cmd.query),
-        Commands::Get(get_cmd) => get_item(&data_manager, get_cmd.query),
+        Commands::Get(get_cmd) => get_item(&mut data_manager, get_cmd.query),
     }
 }
 
@@ -88,7 +88,7 @@ fn remove_item(
 }
 
 /// Retrieve an item based on a query.
-fn get_item(data_manager: &DataManager, query: Option<String>) -> Result<(), Box<dyn Error>> {
+fn get_item(data_manager: &mut DataManager, query: Option<String>) -> Result<(), Box<dyn Error>> {
     let query_string = query.unwrap_or_else(|| {
         match String::from_utf8(read_stdin_as_bytes().unwrap_or_default()) {
             Ok(value) => value,
@@ -112,6 +112,7 @@ fn get_item(data_manager: &DataManager, query: Option<String>) -> Result<(), Box
         item.mime_type
     );
 
+    data_manager.put_item_on_top(parsed_index)?;
     Ok(())
 }
 
