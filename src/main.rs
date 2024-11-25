@@ -41,15 +41,15 @@ fn run_app() -> Result<(), Box<dyn Error>> {
         Commands::List(_) => list_items(&data_manager),
         Commands::Store(_) => store_item(&mut data_manager),
         Commands::Clear(_) => clear_database(&mut data_manager),
-        Commands::Remove(remove_cmd) => remove_item(&mut data_manager, remove_cmd.query),
-        Commands::Get(get_cmd) => get_item(&mut data_manager, get_cmd.query),
+        Commands::Remove(remove_cmd) => remove_item(&mut data_manager, remove_cmd.entry),
+        Commands::Get(get_cmd) => get_item(&mut data_manager, get_cmd.entry),
     }
 }
 
 /// List all items in the database.
 fn list_items(data_manager: &DataManager) -> Result<(), Box<dyn Error>> {
     for (index, item) in data_manager.manifest_data.iter().enumerate() {
-        println!("{index}: {}", item.preview.replace("\n", "").trim());
+        println!("{}: {}", index+1, item.preview.replace("\n", "").trim());
     }
     Ok(())
 }
@@ -67,19 +67,19 @@ fn clear_database(data_manager: &mut DataManager) -> Result<(), Box<dyn Error>> 
     Ok(())
 }
 
-/// Remove an item based on a query.
+/// Remove an item based on a entry.
 fn remove_item(
     data_manager: &mut DataManager,
-    query: Option<String>,
+    entry: Option<String>,
 ) -> Result<(), Box<dyn Error>> {
-    let query_string = query.unwrap_or_else(|| {
+    let query_string = entry.unwrap_or_else(|| {
         match String::from_utf8(read_stdin_as_bytes().unwrap_or_default()) {
             Ok(value) => value,
             Err(_) => String::new(), // Default to an empty string on error
         }
     });
     if query_string.is_empty() {
-        return Ok(()); // No query, no action
+        return Ok(()); // No entry, no action
     }
 
     let parsed_index = parse_query(&query_string)?;
@@ -87,9 +87,9 @@ fn remove_item(
     Ok(())
 }
 
-/// Retrieve an item based on a query.
-fn get_item(data_manager: &mut DataManager, query: Option<String>) -> Result<(), Box<dyn Error>> {
-    let query_string = query.unwrap_or_else(|| {
+/// Retrieve an item based on a entry.
+fn get_item(data_manager: &mut DataManager, entry: Option<String>) -> Result<(), Box<dyn Error>> {
+    let query_string = entry.unwrap_or_else(|| {
         match String::from_utf8(read_stdin_as_bytes().unwrap_or_default()) {
             Ok(value) => value,
             Err(_) => String::new(), // Default to an empty string on error
@@ -97,7 +97,7 @@ fn get_item(data_manager: &mut DataManager, query: Option<String>) -> Result<(),
     });
 
     if query_string.is_empty() {
-        return Ok(()); // No query, no action
+        return Ok(()); // No entry, no action
     }
 
     let parsed_index = parse_query(&query_string)?;
@@ -116,10 +116,15 @@ fn get_item(data_manager: &mut DataManager, query: Option<String>) -> Result<(),
     Ok(())
 }
 
-/// Parse the query string and extract an index.
-fn parse_query(query: &str) -> Result<usize, Box<dyn Error>> {
-    let index_str = query.split(':').next().unwrap_or(query).trim();
-    Ok(index_str.parse::<usize>()?)
+/// Parse the entry string and extract an index.
+fn parse_query(entry: &str) -> Result<usize, Box<dyn Error>> {
+    let index_str = entry.split(':').next().unwrap_or(entry).trim();
+    let index_parsed = index_str.parse::<usize>()?;
+    if index_parsed == 0 {
+        return Err("Invalid position".into())
+    }
+
+    return Ok(index_parsed-1)
 }
 
 /// Read data from standard input as bytes.
