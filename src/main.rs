@@ -57,6 +57,9 @@ fn list_items(data_manager: &DataManager) -> Result<(), Box<dyn Error>> {
 /// Store a new item from standard input.
 fn store_item(data_manager: &mut DataManager) -> Result<(), Box<dyn Error>> {
     let input_data = read_stdin_as_bytes()?;
+    if input_data.is_empty() {
+        return Ok(());
+    }
     data_manager.add_item(&input_data)?;
     Ok(())
 }
